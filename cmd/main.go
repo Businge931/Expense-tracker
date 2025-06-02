@@ -1,31 +1,43 @@
 package main
 
 import (
-	"time"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/Businge931/expense-tracker/internal/cli"
+	"github.com/Businge931/expense-tracker/internal/repository"
+	"github.com/Businge931/expense-tracker/internal/service"
 )
 
-type Expense struct {
-	ID			int `json:"id"`
-	Name		string `json:"name"`
-	Amount		float64 `json:"amount"`
-	Description	string `json:"description"`
-	Category	string `json:"category"`
-	CreatedAt	time.Time `json:"date"`
-	UpdatedAt	time.Time `json:"-"`
-}
-
-var expensesFilePath string = "expenses.json"
-
 func main() {
-	// 1. Define the args
+	// Set up the data directory in the project
+	execDir, err := os.Getwd()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting current directory: %v\n", err)
+		os.Exit(1)
+	}
 
-	// 2. Check if file exists
+	dataDir := filepath.Join(execDir, "data")
 
-	// 3. Add new expense
+	// Initialize repository
+	repo, err := repository.NewJSONFileRepository(dataDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error initializing repository: %v\n", err)
+		os.Exit(1)
+	}
 
-	// 4. Save expenses to file
+	// Initialize services
+	expenseService := service.NewExpenseService(repo)
+	budgetService := service.NewBudgetService(expenseService)
+	exportService := service.NewExportService(expenseService)
 
-	// 5. Print expenses
+	// Initialize CLI
+	cli := cli.NewCLI(expenseService, budgetService, exportService)
 
+	// Run CLI with command-line arguments
+	if err := cli.Run(os.Args[1:]); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
 }
-
