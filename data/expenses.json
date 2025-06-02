@@ -1,0 +1,10 @@
+{
+  "expenses": [
+    {
+      "id": 1,
+      "description": "Coffee",
+      "amount": 5,
+      "date": "2025-06-02T15:17:39.571779398+03:00"
+    }
+  ]
+}
